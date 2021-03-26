@@ -6,6 +6,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import utils.HibernateSessionFactory;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,10 +32,18 @@ public abstract class Dao<T extends Entity> {
      */
     public T save(T entity) {
         Session session = sessionFactory.openSession();
-        Transaction tx1 = session.beginTransaction();
-        session.save(entity);
-        tx1.commit();
-        session.close();
+        Transaction trans = session.beginTransaction();
+        try {
+            session.save(entity);
+            trans.commit();
+        }
+        catch (Exception ex) {
+            trans.rollback();
+            throw ex;
+        }
+        finally {
+            session.close();
+        }
 
         return entity;
     }
@@ -47,10 +56,17 @@ public abstract class Dao<T extends Entity> {
      */
     public T update(T entity) {
         Session session = sessionFactory.openSession();
-        Transaction tx1 = session.beginTransaction();
-        session.update(entity);
-        tx1.commit();
-        session.close();
+        Transaction trans = session.beginTransaction();
+        try {
+            session.update(entity);
+            trans.commit();
+        }catch (Exception ex) {
+            trans.rollback();
+            throw ex;
+        }
+        finally {
+            session.close();
+        }
 
         return entity;
     }
@@ -83,9 +99,18 @@ public abstract class Dao<T extends Entity> {
      */
     public void delete(T entity) {
         Session session = sessionFactory.openSession();
-        Transaction tx1 = session.beginTransaction();
-        session.delete(entity);
-        tx1.commit();
-        session.close();
+        Transaction trans = session.beginTransaction();
+
+        try {
+            session.delete(entity);
+            trans.commit();
+        }
+        catch (Exception ex) {
+            trans.rollback();
+            throw ex;
+        }
+        finally {
+            session.close();
+        }
     }
 }
